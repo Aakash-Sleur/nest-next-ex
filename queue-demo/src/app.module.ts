@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BullModule } from '@nestjs/bullmq';
 import { EmailModule } from './email/email.module';
+import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -22,7 +23,8 @@ import configuration from './config/configuration';
         },
       }),
     }),
-    EmailModule
+    EmailModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
