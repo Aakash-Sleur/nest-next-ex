@@ -2,22 +2,32 @@
 
 This project implements a complete authentication system with:
 - **Frontend**: Next.js with NextAuth.js and Google OAuth
-- **Backend**: NestJS with JWT tokens and Supabase integration
-- **Database**: Supabase PostgreSQL
+- **Backend**: NestJS with JWT tokens and Supabase PostgreSQL integration
+- **Database**: Supabase PostgreSQL (data storage only, no Supabase Auth)
+
+## Architecture Overview
+
+**Authentication Flow:**
+- NextAuth.js handles OAuth with Google
+- NestJS backend manages user data in Supabase PostgreSQL
+- JWT tokens for API authentication
+- No Supabase Auth - pure data storage approach
 
 ## Setup Instructions
 
-### 1. Supabase Setup
+### 1. Supabase Setup (Database Only)
 
 1. Create a new project at [supabase.com](https://supabase.com)
 2. Go to your project dashboard and note down:
    - Project URL
-   - Anon key
-   - Service role key (from Settings > API)
+   - Anon key (for client-side queries if needed)
+   - Service role key (for backend operations)
 3. Run the SQL schema in your Supabase SQL editor:
    ```sql
    -- Copy and paste the content from supabase-schema.sql
    ```
+
+**Important**: We're using Supabase only as a PostgreSQL database, not for authentication.
 
 ### 2. Google OAuth Setup
 
@@ -132,15 +142,22 @@ The `users` table includes:
 - `name`: User's display name
 - `google_id`: Google OAuth ID (optional)
 - `avatar`: Profile picture URL
+- `email_verified`: Boolean flag for email verification
+- `provider`: OAuth provider (google, github, etc.)
 - `created_at` / `updated_at`: Timestamps
+
+**Optional tables for advanced NextAuth.js features:**
+- `user_sessions`: For session management
+- `user_accounts`: For OAuth provider details
 
 ## Security Features
 
 - **JWT tokens** with configurable expiration
-- **Row Level Security (RLS)** in Supabase
+- **Row Level Security (RLS)** in Supabase (service role access only)
 - **CORS configuration** for frontend-backend communication
 - **Protected routes** on both frontend and backend
 - **Secure session management** with NextAuth.js
+- **No Supabase Auth dependency** - pure data storage approach
 
 ## Customization
 

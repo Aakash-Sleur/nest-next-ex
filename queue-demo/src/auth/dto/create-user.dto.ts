@@ -3,4 +3,6 @@ export class CreateUserDto {
   name: string;
   googleId?: string;
   avatar?: string;
+  emailVerified?: boolean;
+  provider?: string;
 }

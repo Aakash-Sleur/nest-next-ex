@@ -4,6 +4,13 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api';
 
+// Extend the Session type to include accessToken
+declare module 'next-auth' {
+  interface Session {
+    accessToken?: string;
+  }
+}
+
 export function useAuth() {
   const { data: session, status } = useSession();
   const [user, setUser] = useState(null);

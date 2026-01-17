@@ -54,6 +54,8 @@ export class AuthService {
           name: createUserDto.name,
           google_id: createUserDto.googleId,
           avatar: createUserDto.avatar,
+          email_verified: createUserDto.emailVerified || true, // Google emails are verified
+          provider: createUserDto.provider || 'google',
         },
       ])
       .select()
@@ -124,6 +126,8 @@ export class AuthService {
           name: googleUser.name,
           googleId: googleUser.id,
           avatar: googleUser.picture,
+          emailVerified: true,
+          provider: 'google',
         });
       }
     }
