@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "seed:test": "ts-node -r tsconfig-paths/register src/scripts/seed-test-data.ts"
   },
   "dependencies": {
     "@nestjs/bullmq": "^11.0.4",
@@ -30,6 +31,7 @@
     "@supabase/supabase-js": "^2.90.1",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.66.5",
+    "inngest": "^3.49.3",
     "ioredis": "^5.9.1",
     "nodemailer": "^7.0.12",
     "passport": "^0.7.0",

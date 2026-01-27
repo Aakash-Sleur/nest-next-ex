@@ -1,73 +1,42 @@
--- Create users table (No Supabase Auth - Pure data storage)
+-- Minimal Database Schema for Order Processing
+
+-- Simple users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   name VARCHAR(255) NOT NULL,
-  google_id VARCHAR(255) UNIQUE,
-  avatar TEXT,
-  email_verified BOOLEAN DEFAULT FALSE,
-  provider VARCHAR(50) DEFAULT 'google',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
-CREATE INDEX IF NOT EXISTS idx_users_provider ON users(provider);
-
--- Create a function to update the updated_at column
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Create trigger to automatically update updated_at
-CREATE TRIGGER update_users_updated_at 
-    BEFORE UPDATE ON users 
-    FOR EACH ROW 
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Optional: Enable Row Level Security (RLS) for additional security
--- Note: Since we're not using Supabase Auth, we'll use service role for all operations
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-
--- Allow service role (your NestJS backend) to manage all users
-CREATE POLICY "Service role can manage all users" ON users
-    FOR ALL USING (auth.role() = 'service_role');
-
--- Optional: Create sessions table for NextAuth.js session storage (if needed)
-CREATE TABLE IF NOT EXISTS user_sessions (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  session_token VARCHAR(255) UNIQUE NOT NULL,
-  expires TIMESTAMP WITH TIME ZONE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_sessions_token ON user_sessions(session_token);
-CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_expires ON user_sessions(expires);
-
--- Optional: Create accounts table for OAuth provider info (NextAuth.js compatible)
-CREATE TABLE IF NOT EXISTS user_accounts (
+-- Simple orders table
+CREATE TABLE IF NOT EXISTS orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  provider VARCHAR(50) NOT NULL,
-  provider_account_id VARCHAR(255) NOT NULL,
-  access_token TEXT,
-  refresh_token TEXT,
-  expires_at BIGINT,
-  token_type VARCHAR(50),
-  scope TEXT,
-  id_token TEXT,
+  order_number VARCHAR(50) UNIQUE NOT NULL,
+  status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled')),
+  total_amount DECIMAL(10,2) NOT NULL,
+  payment_status VARCHAR(50) DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(provider, provider_account_id)
+  paid_at TIMESTAMP WITH TIME ZONE
 );
 
-CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON user_accounts(user_id);
-CREATE INDEX IF NOT EXISTS idx_accounts_provider ON user_accounts(provider, provider_account_id);
+-- Simple notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  read BOOLEAN DEFAULT FALSE,
+  email_sent BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create essential indexes
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_order_id ON notifications(order_id);

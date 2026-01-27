@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+// import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { createSupabaseClient } from '../config/supabase.config';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -11,7 +11,7 @@ export class AuthService {
   private supabase;
 
   constructor(
-    private jwtService: JwtService,
+    // private jwtService: JwtService,
     private configService: ConfigService,
   ) {
     this.supabase = createSupabaseClient(configService);
@@ -88,7 +88,7 @@ export class AuthService {
     };
 
     return {
-      access_token: this.jwtService.sign(payload),
+      // access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
         email: user.email,
@@ -139,13 +139,13 @@ export class AuthService {
     return this.login(user);
   }
 
-  async validateToken(token: string): Promise<User | null> {
-    try {
-      const payload = this.jwtService.verify(token);
-      const user = await this.findUserByEmail(payload.email);
-      return user;
-    } catch (error) {
-      throw new UnauthorizedException('Invalid token');
-    }
-  }
+  // async validateToken(token: string): Promise<User | null> {
+  //   try {
+  //     const payload = this.jwtService.verify(token);
+  //     const user = await this.findUserByEmail(payload.email);
+  //     return user;
+  //   } catch (error) {
+  //     throw new UnauthorizedException('Invalid token');
+  //   }
+  // }
 }
